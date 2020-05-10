@@ -30,6 +30,7 @@ class FetchKeyRecords(object):
         self.now = datetime.datetime.utcnow()
 
     def key_for_time(self, now):
+        # TODO: PR2
         return MobileAuthKeyRecord.key_for_time(
             domain=self.domain,
             user_id=self.user_id,

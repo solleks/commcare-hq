@@ -36,6 +36,7 @@ class MobileAuthKeyRecord(Document):
     def uuid(self):
         return self.get_id
 
+    # TODO: PR2
     @classmethod
     def key_for_time(cls, domain, user_id, now):
         now_json = json_format_datetime(now)

@@ -13,6 +13,7 @@ def generate_aes_key():
     return base64.b64encode(bin_key)
 
 
+# TODO: PR2
 def new_key_record(domain, user_id, now=None, valid=None):
     """
     return initialized but unsaved MobileAuthKeyRecord
