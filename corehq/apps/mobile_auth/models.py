@@ -59,7 +59,5 @@ class SQLMobileAuthKeyRecord(models.Model):
     type = models.CharField(null=False, max_length=32, choices=[('AES256', 'AES256')], default='AES256')
     key = models.CharField(null=False, max_length=127)
 
-    couch_id = models.CharField(max_length=126, null=True, db_index=True)
-
     class Meta:
         db_table = "mobile_auth_mobileauthkeyrecord"
