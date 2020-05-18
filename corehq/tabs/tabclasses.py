@@ -1673,6 +1673,12 @@ class ProjectSettingsTab(UITab):
             'url': reverse(EditMyProjectSettingsView.urlname, args=[self.domain])
         })
 
+        from corehq.apps.domain.views.settings import EditSingleSignOnInfoView
+        project_info.append({
+            'title': _(EditSingleSignOnInfoView.page_title),
+            'url': reverse(EditSingleSignOnInfoView.urlname, args=[self.domain])
+        })
+
         if toggles.OPENCLINICA.enabled(self.domain):
             from corehq.apps.domain.views.settings import EditOpenClinicaSettingsView
             project_info.append({

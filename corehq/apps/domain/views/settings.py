@@ -44,6 +44,7 @@ from corehq.apps.domain.forms import (
     DomainMetadataForm,
     PrivacySecurityForm,
     ProjectSettingsForm,
+    DomainSingleSignOnForm,
 )
 from corehq.apps.domain.models import LICENSES, Domain
 from corehq.apps.domain.views.base import BaseDomainView, LoginAndDomainMixin
@@ -523,3 +524,48 @@ class RecoveryMeasuresHistory(BaseAdminProjectSettingsView):
                 for app in all_apps
             ), key=lambda x: (-1 * len(x[1]), x[0])),
         }
+
+
+class EditSingleSignOnInfoView(BaseAdminProjectSettingsView):
+    template_name = 'domain/admin/single_sign_on_info.html' # 'domain/admin/info_basic.html'
+    urlname = 'domain_single_sign_on'   # 'domain_basic_info'
+    page_title = ugettext_lazy("Single Sign On")
+
+    @method_decorator(domain_admin_required)
+    def dispatch(self, request, *args, **kwargs):
+        return super(BaseProjectSettingsView, self).dispatch(request, *args, **kwargs)
+
+    @property
+    @memoized
+    def single_sign_on_form(self):
+        initial = {
+            'single_sign_on': self.domain_object.single_sign_on
+        }
+
+        if self.request.method == 'POST':
+            return DomainSingleSignOnForm(
+                self.request.POST,
+                self.request.FILES,
+                domain=self.domain_object
+            )
+
+        return DomainSingleSignOnForm(
+            initial=initial,
+            domain=self.domain_object
+        )
+
+    @property
+    def page_context(self):
+        return {
+            'single_sign_on_form': self.single_sign_on_form,
+        }
+
+    def post(self, request, *args, **kwargs):
+        if self.single_sign_on_form.is_valid():
+            if self.single_sign_on_form.save(request, self.domain_object):
+                messages.success(request, _("Project single sign on settings saved!"))
+            else:
+                messages.error(request, _("There was an error saving your single sign on settings. Please try again!"))
+            return HttpResponseRedirect(self.page_url)
+
+        return self.get(request, *args, **kwargs)

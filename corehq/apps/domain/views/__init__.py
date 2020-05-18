@@ -59,6 +59,7 @@ from corehq.apps.domain.views.settings import (
     EditMyProjectSettingsView,
     EditOpenClinicaSettingsView,
     EditPrivacySecurityView,
+    EditSingleSignOnInfoView,
     FeaturePreviewsView,
     CustomPasswordResetView,
     RecoveryMeasuresHistory,

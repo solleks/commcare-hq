@@ -2435,3 +2435,35 @@ class CreateManageReleasesByAppProfileForm(BaseManageReleasesByAppProfileForm):
         if not self.cleaned_data.get('version'):
             self.add_error('version', _("Please select version"))
         return self.cleaned_data.get('version')
+
+
+class DomainSingleSignOnForm(forms.Form):
+    sso_url = forms.CharField(
+        label=ugettext_lazy("Single Sign On URL"),
+        help_text=ugettext_lazy("The SSO URL pointing to your Active Directory server.")
+    )
+
+    def __init__(self, *args, **kwargs):
+        self.project = kwargs.pop('domain', None)
+        self.domain = self.project.name
+        super(DomainSingleSignOnForm, self).__init__(*args, **kwargs)
+        self.helper = hqcrispy.HQFormHelper(self)
+        self.helper.all().wrap_together(crispy.Fieldset, _('Single Sign On Information'))
+        self.helper.layout.append(
+            hqcrispy.FormActions(
+                StrictButton(
+                    _("Update Single Sign On Info"),
+                    type="submit",
+                    css_class='btn-primary',
+                )
+            )
+        )
+
+    def clean(self):
+        cleaned_data = super(DomainSingleSignOnForm, self).clean()
+        return cleaned_data
+
+    def save(self, request, domain):
+        domain.sso_url = self.cleaned_data['sso_url']
+        domain.save()
+        return True
