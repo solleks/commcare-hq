@@ -449,8 +449,10 @@ class Domain(QuickCachedDocumentMixin, BlobMixin, Document, SnapshotMixin):
     # seconds between sending mobile UCRs to users. Can be overridden per user
     default_mobile_ucr_sync_interval = IntegerProperty()
 
-    # single sign on URL
-    single_sign_on = StringProperty()
+    # Microsoft Identity Platform single sign on parameters
+    authority_url = StringProperty()
+    application_id = StringProperty()
+    client_secret_which_should_be_encrypted = StringProperty()
 
     @classmethod
     def wrap(cls, data):

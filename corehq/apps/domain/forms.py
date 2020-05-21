@@ -2,6 +2,7 @@ import datetime
 import io
 import json
 import logging
+import msal
 import re
 import sys
 import uuid
@@ -2438,9 +2439,24 @@ class CreateManageReleasesByAppProfileForm(BaseManageReleasesByAppProfileForm):
 
 
 class DomainSingleSignOnForm(forms.Form):
-    sso_url = forms.CharField(
-        label=ugettext_lazy("Single Sign On URL"),
-        help_text=ugettext_lazy("The SSO URL pointing to your Active Directory server.")
+    authority_url = forms.CharField(
+        label=ugettext_lazy("Microsoft Identity Platform URL"),
+        help_text=ugettext_lazy("The URL of an Active Directory service "
+                                "that performs single sign on authentication. "
+                                "If authentication is configured to take your "
+                                "tenant ID, then include the tenant ID in this "
+                                "URL.")
+    )
+    application_id = forms.CharField(
+        label=ugettext_lazy("Application ID"),
+        help_text=ugettext_lazy("The identifier given to CommCare HQ in your "
+                                "Active Directory configuration.")
+    )
+    client_secret_which_should_be_encrypted = forms.CharField(
+        label=ugettext_lazy("Client Secret"),
+        help_text=ugettext_lazy("The secret value to be used by CommCare HQ to "
+                                "prove its identity. We must find a way to store "
+                                "this value encrypted.")
     )
 
     def __init__(self, *args, **kwargs):
@@ -2464,6 +2480,66 @@ class DomainSingleSignOnForm(forms.Form):
         return cleaned_data
 
     def save(self, request, domain):
-        domain.sso_url = self.cleaned_data['sso_url']
+        domain.authority_url = self.cleaned_data['authority_url']
+        domain.application_id = self.cleaned_data['application_id']
+        domain.client_secret_which_should_be_encrypted = self.cleaned_data['client_secret_which_should_be_encrypted']
         domain.save()
         return True
+
+
+def _build_auth_url(authority, client_id, client_secret, scopes=None, state=None,
+                    redirect_uri=None):
+    return msal.ConfidentialClientApplication(client_id, authority=authority,
+                                              client_credential=client_secret).\
+                                              get_authorization_request_url(
+                                                  scopes or [],
+                                                  state=state or str(uuid.uuid4()),
+                                                  redirect_uri=redirect_uri or "/index")
+
+class DomainTestSingleSignOnForm(forms.Form):
+    def __init__(self, *args, **kwargs):
+        self.project = kwargs.pop('domain', None)
+        self.main_context = kwargs.pop('main_context', None)
+        self.page_url = kwargs.pop('page_url', None)
+        self.request = kwargs.pop('request', None)
+        self.id_token_claims = kwargs.pop('id_token_claims', None)
+        self.domain = self.project.name
+        super(DomainTestSingleSignOnForm, self).__init__(*args, **kwargs)
+
+        from corehq.apps.domain.views.settings import TestSingleSignOnView
+
+        redirect_uri = self.request.build_absolute_uri(reverse(TestSingleSignOnView.urlname,
+                                                               args=[self.domain]))
+
+        login_url = _build_auth_url(self.project.authority_url, self.project.application_id,
+                                    self.project.client_secret_which_should_be_encrypted,
+                                    scopes=["User.Read"], state=str(uuid.uuid4()),
+                                    redirect_uri=redirect_uri)
+        logout_url = self.project.authority_url + "/oauth2/v2.0/logout" + \
+                     "?post_logout_redirect_uri=" + redirect_uri
+
+        self.helper = hqcrispy.HQFormHelper(self)
+        self.helper.layout = crispy.Layout(
+            crispy.Fieldset(ugettext_lazy("Test Single Sign On"),
+                            hqcrispy.StaticField(ugettext_lazy('Microsoft Identity Platform URL'),
+                                                 self.project.authority_url),
+                            hqcrispy.StaticField(ugettext_lazy('Application ID'),
+                                                 self.project.application_id)
+            ))
+        if self.id_token_claims:
+            self.helper.layout.append(
+                hqcrispy.StaticField(ugettext_lazy('id_token_claims'), str(self.id_token_claims))
+            )
+        self.helper.layout.append(
+            hqcrispy.FormActions(
+                hqcrispy.LinkButton(
+                    _("Login"),
+                    login_url,
+                    css_class='btn btn-default',
+                ),
+                hqcrispy.LinkButton(
+                    _("Logout"),
+                    logout_url,
+                    css_class='btn btn-default',
+                )
+            ))

@@ -71,6 +71,7 @@ from corehq.apps.domain.views.settings import (
     FeaturePreviewsView,
     CustomPasswordResetView,
     RecoveryMeasuresHistory,
+    TestSingleSignOnView,
 )
 from corehq.apps.domain.views.sms import SMSRatesView
 from corehq.apps.linked_domain.views import DomainLinkView
@@ -132,7 +133,8 @@ domain_settings = [
     url(r'^$', DefaultProjectSettingsView.as_view(), name=DefaultProjectSettingsView.urlname),
     url(r'^my_settings/$', EditMyProjectSettingsView.as_view(), name=EditMyProjectSettingsView.urlname),
     url(r'^basic/$', EditBasicProjectInfoView.as_view(), name=EditBasicProjectInfoView.urlname),
-    url(r'^single_sign_on/$', EditSingleSignOnInfoView.as_view(), name=EditSingleSignOnInfoView.urlname),
+    url(r'^configure_sso/$', EditSingleSignOnInfoView.as_view(), name=EditSingleSignOnInfoView.urlname),
+    url(r'^test_sso/$', TestSingleSignOnView.as_view(), name=TestSingleSignOnView.urlname),
     url(r'^call_center_owner_options/', CallCenterOwnerOptionsView.as_view(),
         name=CallCenterOwnerOptionsView.url_name),
     url(r'^privacy/$', EditPrivacySecurityView.as_view(), name=EditPrivacySecurityView.urlname),

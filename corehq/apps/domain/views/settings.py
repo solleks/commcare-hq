@@ -1,4 +1,5 @@
 import json
+import msal
 from collections import defaultdict
 
 from django.conf import settings
@@ -45,6 +46,7 @@ from corehq.apps.domain.forms import (
     PrivacySecurityForm,
     ProjectSettingsForm,
     DomainSingleSignOnForm,
+    DomainTestSingleSignOnForm,
 )
 from corehq.apps.domain.models import LICENSES, Domain
 from corehq.apps.domain.views.base import BaseDomainView, LoginAndDomainMixin
@@ -527,9 +529,9 @@ class RecoveryMeasuresHistory(BaseAdminProjectSettingsView):
 
 
 class EditSingleSignOnInfoView(BaseAdminProjectSettingsView):
-    template_name = 'domain/admin/single_sign_on_info.html' # 'domain/admin/info_basic.html'
-    urlname = 'domain_single_sign_on'   # 'domain_basic_info'
-    page_title = ugettext_lazy("Single Sign On")
+    template_name = 'domain/admin/single_sign_on_info.html'
+    urlname = 'domain_configure_sso'
+    page_title = ugettext_lazy("Configure Single Sign On")
 
     @method_decorator(domain_admin_required)
     def dispatch(self, request, *args, **kwargs):
@@ -539,7 +541,9 @@ class EditSingleSignOnInfoView(BaseAdminProjectSettingsView):
     @memoized
     def single_sign_on_form(self):
         initial = {
-            'single_sign_on': self.domain_object.single_sign_on
+            'authority_url': self.domain_object.authority_url,
+            'application_id': self.domain_object.application_id,
+            'client_secret_which_should_be_encrypted': self.domain_object.client_secret_which_should_be_encrypted
         }
 
         if self.request.method == 'POST':
@@ -569,3 +573,52 @@ class EditSingleSignOnInfoView(BaseAdminProjectSettingsView):
             return HttpResponseRedirect(self.page_url)
 
         return self.get(request, *args, **kwargs)
+
+
+class TestSingleSignOnView(BaseAdminProjectSettingsView):
+    template_name = 'domain/admin/test_single_sign_on.html'
+    urlname = 'domain_test_sso'
+    page_title = ugettext_lazy("Test Single Sign On")
+
+    @method_decorator(domain_admin_required)
+    def dispatch(self, request, *args, **kwargs):
+        return super(BaseProjectSettingsView, self).dispatch(request, *args, **kwargs)
+
+    @property
+    @memoized
+    def test_single_sign_on_form(self):
+        initial = {
+            'authority_url': self.domain_object.authority_url,
+            'application_id': self.domain_object.application_id,
+            'client_secret_which_should_be_encrypted': self.domain_object.client_secret_which_should_be_encrypted
+        }
+
+
+        id_token_claims = None
+        if 'code' in self.request.GET:
+            redirect_uri = self.request.build_absolute_uri(reverse(TestSingleSignOnView.urlname,
+                                                                   args=[self.domain_object.name]))
+            result = msal.ConfidentialClientApplication(initial['application_id'],
+                                                        authority=initial['authority_url'],
+                                                        client_credential=initial['client_secret_which_should_be_encrypted']).\
+                                                        acquire_token_by_authorization_code(
+                                                            self.request.GET['code'],
+                                                            scopes=["User.Read"],
+                                                            redirect_uri=redirect_uri)
+            if 'id_token_claims' in result:
+                id_token_claims = result['id_token_claims']
+
+        return DomainTestSingleSignOnForm(
+            initial=initial,
+            domain=self.domain_object,
+            main_context=self.main_context,
+            page_url=self.page_url,
+            id_token_claims=id_token_claims,
+            request=self.request
+        )
+
+    @property
+    def page_context(self):
+        return {
+            'test_single_sign_on_form': self.test_single_sign_on_form,
+        }
