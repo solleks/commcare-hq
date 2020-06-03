@@ -19,9 +19,15 @@ from corehq.apps.users.models import CouchUser
 
 
 class EmailAuthenticationForm(NoAutocompleteMixin, AuthenticationForm):
-    username = forms.EmailField(label=_("E-mail"), max_length=75,
+    username = forms.EmailField(label=_("E-mail"), required=False, max_length=75,
                                 widget=forms.TextInput(attrs={'class': 'form-control'}))
-    password = forms.CharField(label=_("Password"), widget=forms.PasswordInput(attrs={'class': 'form-control'}))
+    password = forms.CharField(label=_("Password"), required=False, widget=forms.PasswordInput(attrs={'class': 'form-control'}))
+
+    sign_in_choices = [("UserAndPassword", "Username and password"),
+                       ("SSO", "Single sign on")]
+    sign_in_method = forms.ChoiceField(label=_("Sign in method"), choices=sign_in_choices, required=False)
+
+    project = forms.CharField(label=_("Project name (for SSO)"), required=False, widget=forms.TextInput(attrs={'class': 'form-control'}))
 
     def clean_username(self):
         username = self.cleaned_data.get('username', '').lower()

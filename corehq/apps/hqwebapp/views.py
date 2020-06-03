@@ -17,6 +17,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.views import LogoutView
 from django.core import cache
 from django.core.mail.message import EmailMessage
+from django.core.signing import TimestampSigner
 from django.http import (
     Http404,
     HttpResponse,
@@ -28,6 +29,7 @@ from django.http import (
     HttpResponseServerError,
     JsonResponse,
 )
+from django.middleware.csrf import get_token
 from django.shortcuts import redirect, render
 from django.template import loader
 from django.template.loader import render_to_string
@@ -97,6 +99,8 @@ from corehq.apps.hqwebapp.utils import (
 )
 from corehq.apps.locations.models import SQLLocation
 from corehq.apps.locations.permissions import location_safe
+from corehq.apps.oauth_sso.client import MicrosoftClient
+from corehq.apps.oauth_sso.models import AzureADConfiguration
 from corehq.apps.users.landing_pages import (
     get_cloudcare_urlname,
     get_redirect_url,
@@ -370,6 +374,29 @@ def _login(req, domain_name, custom_login_page, extra_context=None):
             return HttpResponseRedirect(reverse('homepage'))
         else:
             return HttpResponseRedirect(reverse('domain_homepage', args=[domain_name]))
+
+    # OAuth SSO
+    if req.method == 'POST' and req.POST['auth-sign_in_method'] == 'SSO':
+        project_name = req.POST['auth-project']
+
+        # Here we play the role of context_processor in django_microsoft_auth
+        # because we're computing the authorization URL and redirecting to it
+        # immediately rather than rendering a page that contains it.
+        azure_ad_config = None
+        try:
+            azure_ad_config = AzureADConfiguration.objects.get(
+                project=project_name)
+        except AzureADConfiguration.DoesNotExist:
+            print('No Azure AD config found for project:', project_name)
+
+        if azure_ad_config is not None:
+            csrf_token = get_token(req)
+            signer = TimestampSigner()
+            state = signer.sign(csrf_token)
+            client = MicrosoftClient(azure_ad_config, state=state, request=req)
+            # Where will this go after microsoft/auth-callback? To homepage.
+            return HttpResponseRedirect(client.authorization_url())
+    # /OAuth SSO
 
     if req.method == 'POST' and domain_name and '@' not in req.POST.get('auth-username', '@'):
         with mutable_querydict(req.POST):

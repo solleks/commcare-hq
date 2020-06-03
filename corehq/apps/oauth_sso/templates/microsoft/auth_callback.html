@@ -1,0 +1,18 @@
+{% load i18n %}
+
+<html>
+  <body>
+    <p>{% trans "This window should automatically close. If it does not, it should be safe to close after a few seconds." %}</p>
+    <pre>{{ message }}</pre>
+    <a href="/homepage/">Go to homepage</a>
+    <script>
+      document.addEventListener("DOMContentLoaded", function(event) {
+        // post message to parent window
+        console.log("posting message to {{ base_url }}");
+        console.log(window.opener);
+        window.opener.postMessage({{ message }}, "{{ base_url }}");
+        window.close();
+      });
+    </script>
+  </body>
+</html>

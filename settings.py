@@ -171,6 +171,7 @@ ENABLE_DRACONIAN_SECURITY_FEATURES = False
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
     'corehq.apps.domain.auth.ApiKeyFallbackBackend',
+    'corehq.apps.oauth_sso.backends.MicrosoftAuthenticationBackend',
 ]
 
 PASSWORD_HASHERS = (
@@ -349,6 +350,7 @@ HQ_APPS = (
     'corehq.apps.case_search',
     'corehq.apps.zapier.apps.ZapierConfig',
     'corehq.apps.translations',
+    'corehq.apps.oauth_sso.apps.OAuthSsoConfig',
 
     # custom reports
     'pact',

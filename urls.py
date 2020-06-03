@@ -129,6 +129,7 @@ urlpatterns = [
     url(r'^builds/', include('corehq.apps.builds.urls')),
     url(r'^downloads/temp/', include('soil.urls')),
     url(r'^styleguide/', include('corehq.apps.styleguide.urls')),
+    url(r'^microsoft/', include('corehq.apps.oauth_sso.urls'), name='microsoft'),
     url(r'^500/$', TemplateView.as_view(template_name='500.html')),
     url(r'^404/$', TemplateView.as_view(template_name='404.html')),
     url(r'^403/$', TemplateView.as_view(template_name='403.html')),
