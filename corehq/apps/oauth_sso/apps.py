@@ -13,7 +13,7 @@ class OAuthSsoConfig(AppConfig):
 @register()
 def microsoft_auth_validator(app_configs, **kwargs):
     from django.contrib.sites.models import Site
-    from .conf import config, HOOK_SETTINGS
+    from .conf import config
 
     errors = []
 
@@ -62,76 +62,5 @@ def microsoft_auth_validator(app_configs, **kwargs):
                     id="microsoft_auth.W002",
                 )
             )
-
-    if config.MICROSOFT_AUTH_LOGIN_ENABLED:  # pragma: no branch
-        if config.MICROSOFT_AUTH_CLIENT_ID == "":
-            errors.append(
-                Warning(
-                    ("`MICROSOFT_AUTH_CLIENT_ID` is not configured"),
-                    hint=(
-                        "`MICROSOFT_AUTH_LOGIN_ENABLED` is `True`, but "
-                        "`MICROSOFT_AUTH_CLIENT_ID` is empty. Microsoft "
-                        "auth will be disabled"
-                    ),
-                    id="microsoft_auth.W003",
-                )
-            )
-        if config.MICROSOFT_AUTH_CLIENT_SECRET == "":
-            errors.append(
-                Warning(
-                    ("`MICROSOFT_AUTH_CLIENT_SECRET` is not configured"),
-                    hint=(
-                        "`MICROSOFT_AUTH_LOGIN_ENABLED` is `True`, but "
-                        "`MICROSOFT_AUTH_CLIENT_SECRET` is empty. Microsoft "
-                        "auth will be disabled"
-                    ),
-                    id="microsoft_auth.W004",
-                )
-            )
-
-    for hook_setting_name in HOOK_SETTINGS:
-        hook_setting = getattr(config, hook_setting_name)
-        if hook_setting != "":
-            parts = hook_setting.rsplit(".", 1)
-
-            if len(parts) != 2:
-                errors.append(
-                    Critical(
-                        ("{} is not a valid python path".format(hook_setting)),
-                        id="microsoft_auth.E002",
-                    )
-                )
-                return errors
-
-            module_path, function_name = parts[0], parts[1]
-            try:
-                module = importlib.import_module(module_path)
-            except ImportError:
-                errors.append(
-                    Critical(
-                        ("{} is not a valid module".format(module_path)),
-                        id="microsoft_auth.E003",
-                    )
-                )
-                return errors
-
-            try:
-                function = getattr(module, function_name)
-            except AttributeError:
-                errors.append(
-                    Critical(
-                        ("{} does not exist".format(hook_setting)),
-                        id="microsoft_auth.E004",
-                    )
-                )
-                return errors
-
-            if not callable(function):
-                errors.append(
-                    Critical(
-                        ("{} is not a callable".format(hook_setting)),
-                        id="microsoft_auth.E005",
-                    )
-                )
 
     return errors

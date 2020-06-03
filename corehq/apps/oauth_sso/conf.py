@@ -19,48 +19,12 @@ settings = None
     here. See bottom of file for more on it.
 """
 
-HOOK_SETTINGS = [
-    "MICROSOFT_AUTH_AUTHENTICATE_HOOK",
-    "MICROSOFT_AUTH_CALLBACK_HOOK",
-]
-
 DEFAULT_CONFIG = {
     "defaults": {
         "MICROSOFT_AUTH_LOGIN_ENABLED": (
             True,
             _("Whether or not Microsoft OAuth login is enabled."),
             bool,
-        ),
-        "MICROSOFT_AUTH_TENANT_ID": (
-            "common",
-            _("Microsoft Office 365 Tenant ID"),
-            str,
-        ),
-        "MICROSOFT_AUTH_CLIENT_ID": (
-            "",
-            _(
-                """Microsoft OAuth Client ID, see
-                https://apps.dev.microsoft.com/ for more."""
-            ),
-            str,
-        ),
-        "MICROSOFT_AUTH_CLIENT_SECRET": (
-            "",
-            _(
-                """Microsoft OAuth Client Secret, see
-                https://apps.dev.microsoft.com/ for more."""
-            ),
-            str,
-        ),
-        "MICROSOFT_AUTH_EXTRA_SCOPES": (
-            "",
-            _(
-                """Extra OAuth scopes for authentication. Required
-                scopes are always provided ('openid email'
-                for Microsoft Auth). Scopes are space
-                delimited."""
-            ),
-            str,
         ),
         "MICROSOFT_AUTH_AUTO_CREATE": (
             True,
@@ -78,55 +42,12 @@ DEFAULT_CONFIG = {
             ),
             bool,
         ),
-        "MICROSOFT_AUTH_AUTHENTICATE_HOOK": (
-            "",
-            _(
-                """Callable hook to call after authenticating a user on the
-                `microsoft_auth.backends.MicrosoftAuthenticationBackend`.
-
-                If the login type is Microsoft Auth, the parameters will be
-                `(User: user, oauthlib.oauth2.rfc6749.tokens.OAuth2Token:
-                token)`"""
-            ),
-            str,
-        ),
-        "MICROSOFT_AUTH_CALLBACK_HOOK": (
-            "",
-            _(
-                """Callable hook to call right before completing the `auth_callback` view.
-
-                Really useful for adding custom data to message or chaning the
-                expected base URL that gets passed back up to the window that
-                initiated the original Authorize request.
-
-                The parameters that will be passed will be `(HttpRequest:
-                request, dict: context)`.
-
-                The expected return value is the updated context dictionary.
-                You should NOT remove the data that is currently there.
-
-                `base_url` is the expected root URL of the window that
-                initiated the authorize request
-
-                `message` is a dictionary that will be serialized as a JSON
-                string and passoed back to the initiating window.
-                """
-            ),
-            str,
-        ),
     },
     "fieldsets": {
         "Microsoft Login": (
             "MICROSOFT_AUTH_LOGIN_ENABLED",
-            "MICROSOFT_AUTH_TENANT_ID",
-            "MICROSOFT_AUTH_CLIENT_ID",
-            "MICROSOFT_AUTH_CLIENT_SECRET",
-            "MICROSOFT_AUTH_EXTRA_SCOPES",
             "MICROSOFT_AUTH_AUTO_CREATE",
-            "MICROSOFT_AUTH_REGISTER_INACTIVE_ADMIN",
             "MICROSOFT_AUTH_AUTO_REPLACE_ACCOUNTS",
-            "MICROSOFT_AUTH_AUTHENTICATE_HOOK",
-            "MICROSOFT_AUTH_CALLBACK_HOOK",
         )
     },
 }
