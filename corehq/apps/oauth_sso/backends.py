@@ -5,7 +5,6 @@ from django.contrib.auth.backends import ModelBackend
 
 from .client import MicrosoftClient
 from .models import MicrosoftAccount, AzureADConfiguration
-from .utils import get_hook
 
 logger = logging.getLogger("django")
 User = get_user_model()
@@ -60,9 +59,6 @@ class MicrosoftAuthenticationBackend(ModelBackend):
                     token["scope"]
             ):
                 user = self._authenticate_user()
-
-            if user is not None:
-                self._call_hook(user)
 
         return user
 
@@ -155,8 +151,3 @@ class MicrosoftAuthenticationBackend(ModelBackend):
             return MicrosoftAccount.objects.get(user=user)
         except MicrosoftAccount.DoesNotExist:
             return None
-
-    def _call_hook(self, user):
-        function = get_hook("MICROSOFT_AUTH_AUTHENTICATE_HOOK")
-        if function is not None:
-            function(user, self.client.token)

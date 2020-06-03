@@ -10,7 +10,6 @@ from django.middleware.csrf import CSRF_TOKEN_LENGTH
 from django.urls import reverse
 
 from .models import AzureADConfiguration
-from .utils import get_scheme
 
 logger = logging.getLogger("django")
 
@@ -50,7 +49,7 @@ class MicrosoftClient:
         path = reverse("microsoft_auth:auth-callback")
         scope = " ".join(self.SCOPE_MICROSOFT).strip()
 
-        scheme = get_scheme(request, self.config)
+        scheme = request.scheme
 
         authority_url = self._authority_url.format(
             tenant=self.azure_ad_config.tenant_id)

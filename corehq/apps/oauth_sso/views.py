@@ -14,8 +14,6 @@ from django.utils.translation import ugettext as _
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 
-from .utils import get_hook, get_scheme
-
 logger = logging.getLogger("django")
 
 
@@ -51,7 +49,7 @@ class AuthenticateCallbackView(View):
     def get_context_data(self, **kwargs):
         domain = Site.objects.get_current(self.request).domain
 
-        scheme = get_scheme(self.request)
+        scheme = self.request.scheme
 
         self.context = {
             "base_url": "{0}://{1}/".format(scheme, domain),
@@ -77,10 +75,6 @@ class AuthenticateCallbackView(View):
             self.context["message"]["error_description"] = self.messages[
                 self.context["message"]["error"]
             ]
-
-        function = get_hook("MICROSOFT_AUTH_CALLBACK_HOOK")
-        if function is not None:
-            self.context = function(self.request, self.context)
 
         self.context["message"] = mark_safe(  # nosec
             json.dumps({"microsoft_auth": self.context["message"]})
