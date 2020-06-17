@@ -171,6 +171,7 @@ ENABLE_DRACONIAN_SECURITY_FEATURES = False
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
     'corehq.apps.domain.auth.ApiKeyFallbackBackend',
+    'djangosaml2.backends.Saml2Backend',
 ]
 
 PASSWORD_HASHERS = (
@@ -349,6 +350,8 @@ HQ_APPS = (
     'corehq.apps.case_search',
     'corehq.apps.zapier.apps.ZapierConfig',
     'corehq.apps.translations',
+    'corehq.apps.saml',
+    'sslserver',
 
     # custom reports
     'pact',
@@ -2150,3 +2153,23 @@ if RESTRICT_USED_PASSWORDS_FOR_NIC_COMPLIANCE:
     ]
 
 PACKAGE_MONITOR_REQUIREMENTS_FILE = os.path.join(FILEPATH, 'requirements', 'requirements.txt')
+
+# SAML settings
+
+SAML_CONFIG_LOADER = 'corehq.apps.saml.config_loader.LoadSamlConfig'
+
+SAML_DJANGO_USER_MAIN_ATTRIBUTE = 'email'
+SAML_DJANGO_USER_MAIN_ATTRIBUTE_LOOKUP = '__iexact'
+SAML_CREATE_UNKNOWN_USER = False
+
+# Combination of attributes for OneLogin and Microsoft Azure AD.
+SAML_ATTRIBUTE_MAPPING = {
+    # OneLogin attributes
+    'User.email': ('email', ),
+    'User.FirstName': ('first_name', ),
+    'User.LastName': ('last_name', ),
+    # Azure AD attributes
+    'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress': ('email', ),
+    'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname': ('first_name', ),
+    'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname': ('last_name', ),
+}

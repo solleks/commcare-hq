@@ -371,6 +371,15 @@ def _login(req, domain_name, custom_login_page, extra_context=None):
         else:
             return HttpResponseRedirect(reverse('domain_homepage', args=[domain_name]))
 
+    # SAML SSO
+    if req.method == 'POST' and req.POST['auth-sign_in_method'] == 'SamlSSO':
+        project_name = req.POST['auth-project']
+        print('POST dict', req.POST.dict)
+        return HttpResponseRedirect(reverse('saml2_login',
+                                            {'project': project_name,
+                                             'next': '/homepage/?project={}'.format(project_name)}))
+    # /SAML SSO
+
     if req.method == 'POST' and domain_name and '@' not in req.POST.get('auth-username', '@'):
         with mutable_querydict(req.POST):
             req.POST['auth-username'] = format_username(req.POST['auth-username'], domain_name)
