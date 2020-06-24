@@ -119,6 +119,8 @@ def LoadSamlConfig(request):
         # set to 1 to output debugging information
         'debug': 1,
 
+        # TODO(Charlie): Can we delete these keys because we aren't
+        # doing identity provision?
         # Signing
         'key_file': os.path.join(base_dir, 'keys/mycert.key'),  # private part
         'cert_file': os.path.join(base_dir, 'keys/mycert.cert'),  # public part
@@ -147,7 +149,6 @@ def LoadSamlConfig(request):
 
         # Library does not know about attributes for microsoft claims
         'allow_unknown_attributes': True
-        # TODO(Charlie): Probably have to change attribute mappings.
     }
 
     return saml2.config.config_factory('dict', saml_config)
