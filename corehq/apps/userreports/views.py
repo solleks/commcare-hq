@@ -1191,6 +1191,7 @@ def undelete_data_source(request, domain, config_id):
 @toggles.USER_CONFIGURABLE_REPORTS.required_decorator()
 @require_POST
 def rebuild_data_source(request, domain, config_id):
+    print("In rebuild_data_source")
     config, is_static = get_datasource_config_or_404(config_id, domain)
     if config.is_deactivated:
         config.is_deactivated = False

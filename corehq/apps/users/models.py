@@ -1052,6 +1052,7 @@ class CouchUser(Document, DjangoUserMixin, IsMemberOfMixin, EulaMixin):
         if should_save:
             couch_user.save()
 
+        print('wrap:', couch_user)
         return couch_user
 
     class AccountTypeError(Exception):

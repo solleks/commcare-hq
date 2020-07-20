@@ -37,6 +37,7 @@ def api_auth(view_func):
             return HttpResponse(json.dumps({"error": "not authorized"}),
                                 content_type="application/json",
                                 status=401)
+    _inner.__decorator__ = 'api_auth'
     return _inner
 
 

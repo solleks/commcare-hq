@@ -14,7 +14,7 @@ from corehq.apps.users.dbaccessors.all_commcare_users import (
 from corehq.apps.users.models import CommCareUser, CouchUser
 
 
-def require_permission_raw(permission_check,
+def require_permission_raw(permission_check, permission='unknown',
                            login_decorator=login_and_domain_required,
                            view_only_permission_check=None):
     """
@@ -39,6 +39,7 @@ def require_permission_raw(permission_check,
                     return HttpResponse(_("Sorry, you don't have permission to do this action!"), status=403)
                 raise PermissionDenied()
 
+        _inner.__decorator__ = 'require_permission({p})'.format(p=permission)
         if login_decorator:
             return login_decorator(_inner)
         else:
@@ -76,7 +77,7 @@ def require_permission(permission,
         view_only_check = _check_permission
 
     return require_permission_raw(
-        permission_check, login_decorator,
+        permission_check, permission, login_decorator,
         view_only_permission_check=view_only_check
     )
 
@@ -94,7 +95,7 @@ require_can_edit_or_view_groups = require_permission(
     'edit_groups', view_only_permission='view_groups'
 )
 require_can_view_roles = require_permission('view_roles')
-require_can_login_as = require_permission_raw(lambda user, domain: user.can_login_as(domain))
+require_can_login_as = require_permission_raw(lambda user, domain: user.can_login_as(domain), 'login_as')
 
 
 def require_permission_to_edit_user(view_func):

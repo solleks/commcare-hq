@@ -542,7 +542,7 @@ def _get_xform_conflict_response(form, sha1_checksum):
     return None
 
 
-@require_GET
+# @require_GET
 @require_can_edit_apps
 def get_xform_source(request, domain, app_id, form_unique_id):
     app = get_app(domain, app_id)

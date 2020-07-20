@@ -68,5 +68,6 @@ def validate_request_hmac(setting_name, ignore_if_debug=False, audit_user='syste
 
             request.audit_user = audit_user
             return fn(request, *args, **kwargs)
+        _inner.__decorator__ = 'validate_request_hmac'
         return _inner
     return _outer

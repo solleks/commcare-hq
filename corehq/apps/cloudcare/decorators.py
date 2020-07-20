@@ -21,6 +21,7 @@ def require_cloudcare_access_ex():
                         "user was neither a web user or a commcare user!"
                     return login_and_domain_required(view_func)(request, domain, *args, **kwargs)
             return login_and_domain_required(view_func)(request, domain, *args, **kwargs)
+        _inner.__decorator__ = 'require_cloudcare_access'
         return _inner
     return decorator
 

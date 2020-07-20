@@ -59,6 +59,7 @@ class PreviewAggregateUCRView(BaseAggregateUCRView):
 
     @method_decorator(swallow_programming_errors)
     def dispatch(self, request, *args, **kwargs):
+        print('PreviewAggregateUCRView', request)
         return super(PreviewAggregateUCRView, self).dispatch(request, *args, **kwargs)
 
     @property

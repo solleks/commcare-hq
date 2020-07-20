@@ -35,7 +35,20 @@ DISABLE_RANDOM_TOGGLES = UNIT_TESTING
 #         'always_disabled': ['domain4', 'domain3],
 #     }
 #   }
-STATIC_TOGGLE_STATES = {}
+STATIC_TOGGLE_STATES = {
+    'user_reports': {
+        'always_enabled': ['test-project', 'charlie.garrett@gmail.com']
+    },
+    'aggregate_ucrs': {
+        'always_enabled': ['test-project', 'charlie.garrett@gmail.com']
+    },
+    'data_file_download': {
+        'always_enabled': ['test-project', 'charlie.garrett@gmail.com']
+    },
+    'location_reassignment': {
+        'always_enabled': ['test-project', 'charlie.garrett@gmail.com']
+    },
+}
 
 ADMINS = ()
 MANAGERS = ADMINS
@@ -214,6 +227,7 @@ DEFAULT_APPS = (
     'statici18n',
     'django_user_agents',
     'logentry_admin',
+    'django_extensions',
 )
 
 CAPTCHA_FIELD_TEMPLATE = 'hq-captcha-field.html'
