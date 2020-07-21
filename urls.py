@@ -33,6 +33,7 @@ from corehq.apps.settings.urls import \
     domain_specific as settings_domain_specific
 from corehq.apps.settings.urls import users_redirect
 from corehq.apps.sms.urls import sms_admin_interface_urls
+from corehq.util.views import ShowUrlsView
 
 try:
     from localsettings import LOCAL_APP_URLS
@@ -151,6 +152,7 @@ urlpatterns = [
         r'(?P<user_email>[\w.%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,})/(?P<scheduled_report_secret>[\w-]+)/',
         ReportNotificationUnsubscribeView.as_view(), name=ReportNotificationUnsubscribeView.urlname),
     url(r'^phone/list_apps', list_apps, name="list_accessible_apps"),
+    url(r'^show_urls/$', ShowUrlsView.as_view(file_name="AllMappedUrls.txt")),
 ] + LOCAL_APP_URLS
 
 if settings.ENABLE_PRELOGIN_SITE:

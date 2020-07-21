@@ -68,9 +68,7 @@ def redirect_for_login_or_domain(request, login_url=None):
     from django.contrib.auth.views import redirect_to_login
     return redirect_to_login(request.get_full_path(), login_url)
 
-
 def login_and_domain_required(view_func):
-
     @wraps(view_func)
     def _inner(req, domain, *args, **kwargs):
         user = req.user
@@ -116,6 +114,7 @@ def login_and_domain_required(view_func):
         else:
             raise Http404
 
+    _inner.__decorator__ = 'login_and_domain_required'
     return _inner
 
 
@@ -222,6 +221,7 @@ def _login_or_challenge(challenge_fn, allow_cc_users=False, api_key=False, allow
                         return HttpResponseForbidden()
 
                 return _inner(request, domain, *args, **kwargs)
+        safe_fn.__decorator__ = 'login_or_challenge'
         return safe_fn
     return _outer
 
@@ -277,6 +277,7 @@ def _get_multi_auth_decorator(default, allow_formplayer=False):
                 FORMPLAYER: login_or_formplayer_ex(allow_cc_users=True),
             }[authtype]
             return function_wrapper(fn)(request, *args, **kwargs)
+        _inner.__decorator__ = 'multi_auth'
         return _inner
     return decorator
 
@@ -394,8 +395,10 @@ def cls_to_view(additional_decorator=None):
                 return func(cls, request, *args, **kwargs)
 
             if additional_decorator:
+                __inner__.__decorator__ = 'additional_decorator'
                 return additional_decorator(__inner__)(request, domain, *args, **new_kwargs)
             else:
+                __inner__.__decorator__ = 'cls_to_view'
                 return __inner__(request, domain, *args, **new_kwargs)
         return __outer__
     return decorator
@@ -417,6 +420,7 @@ def api_domain_view(view):
             return view(request, domain, *args, **kwargs)
         else:
             return HttpResponseForbidden()
+    _inner.__decorator__ = 'api_domain_view'
     return _inner
 
 
@@ -429,6 +433,7 @@ def login_required(view_func):
 
         # User's login and domain have been validated - it's safe to call the view function
         return view_func(request, *args, **kwargs)
+    _inner.__decorator__ = 'login_required'
     return _inner
 
 
@@ -477,6 +482,7 @@ def domain_admin_required_ex(redirect_page_name=None):
                 return HttpResponseRedirect(reverse(redirect_page_name))
             return view_func(request, domain_name, *args, **kwargs)
 
+        _inner.__decorator__ = 'domain_admin_required'
         return _inner
     return _outer
 
@@ -490,6 +496,7 @@ def require_superuser_or_contractor(view_func):
         else:
             return HttpResponseRedirect(reverse("no_permissions"))
 
+    _inner.__decorator__ = 'require_superuser_or_contractor'
     return _inner
 
 
