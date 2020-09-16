@@ -1,14 +1,26 @@
 import sys
 
+import requests
+
+from django.shortcuts import render
 from django.utils.translation import ugettext as _
 from django.utils.translation import ugettext_lazy
 
 from corehq.apps.locations.permissions import location_safe
+from corehq.apps.domain.decorators import (
+    cls_to_view,
+    login_and_domain_required,
+)
+from corehq.apps.reports.dispatcher import (
+    ProjectReportDispatcher,
+)
 from corehq.apps.reports.standard import (
     ProjectReport,
 )
 
 from corehq.apps.reports.models import TableauVisualization
+
+cls_to_view_login_and_domain = cls_to_view(additional_decorator=login_and_domain_required)
 
 
 class TableauReport(ProjectReport):
@@ -31,6 +43,24 @@ class TableauReport(ProjectReport):
                         "view_url": self.visualization.view_url})
         return context
 
+    @property
+    def view_response(self):
+        # Call the Tableau server to get a ticket.
+        # tabserver_url = 'https://{}/trusted/'.format(vis.server.server_name)
+        tabserver_url = 'http://localhost:8000/trusted/'
+        tabserver_response = requests.post(tabserver_url,
+                                           {'username':self.request.user.username})
+        if tabserver_response.status_code == 200:
+            if tabserver_response.content != b'-1':
+                return super().view_response
+            else:
+                return render(self.request, 'reports/tableau_auth_failed.html',
+                              self.context)
+        else:
+            self.context.update({"status_code": tabserver_response.status_code})
+            return render(self.request, 'reports/tableau_request_failed.html',
+                          self.context)
+
 
 # Making a class per visualization (and on each page load) is overkill, but
 # a class is expected for items in the left nav bar, so we do that for
@@ -39,10 +69,12 @@ def get_reports(domain):
     vis_num = 1
     result = []
     for v in TableauVisualization.objects.all().filter(project=domain):
-        result.append(_make_visualization_class(vis_num, v))
+        visualization_class = _make_visualization_class(vis_num, v)
+        if visualization_class is not None:
+            result.append(visualization_class)
         vis_num += 1
     return tuple(result)
-    # return (ExampleReport,)
+
 
 def _make_visualization_class(num, vis):
     # See _make_report_class in corehq/reports.py
