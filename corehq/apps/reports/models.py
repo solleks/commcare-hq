@@ -209,12 +209,18 @@ class ReportsSidebarOrdering(models.Model):
 
 
 class TableauServer(models.Model):
+    SERVER_TYPES = (
+        ('server', 'Tableau Server'),
+        ('online', 'Tableau Online'),
+    )
+    server_type = models.CharField(max_length=6, choices=SERVER_TYPES, default='server')
     server_name = models.CharField(max_length=128)
     target_site = models.CharField(max_length=64)
 
     def __str__(self):
-        return '{server} {site}'.format(server=self.server_name,
-                                        site=self.target_site)
+        return '{server} {server_type} {site}'.format(server=self.server_name,
+                                                      server_type=self.server_type,
+                                                      site=self.target_site)
 
 
 class TableauVisualization(models.Model):

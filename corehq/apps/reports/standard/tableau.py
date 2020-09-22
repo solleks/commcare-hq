@@ -38,16 +38,24 @@ class TableauReport(ProjectReport):
     @property
     def template_context(self):
         context = super().template_context
-        context.update({"server": self.visualization.server.server_name,
+        context.update({"server_type": self.visualization.server.server_type,
+                        "server_address": self.visualization.server.server_name,
                         "target_site": self.visualization.server.target_site,
                         "view_url": self.visualization.view_url})
         return context
 
     @property
     def view_response(self):
+        if self.visualization.server.server_type == 'server':
+            return self.tableau_server_response()
+        else:
+            return self.tableau_online_response()
+
+    def tableau_server_response(self):
         # Call the Tableau server to get a ticket.
-        method = 'https'
-        tabserver_url = '{}://{}/trusted/'.format(method, self.visualization.server.server_name)
+        tabserver_url = 'https://{}/trusted/'.format(self.visualization.server.server_name)
+        # The verify argument indicates that we trust the self-signed certificate
+        # which lets SSL connections succeed. It should not be used in production.
         tabserver_response = requests.post(tabserver_url,
                                            {'username':self.request.user.username},
                                            verify='corehq/apps/reports/standard/CA_BUNDLE')
@@ -62,6 +70,10 @@ class TableauReport(ProjectReport):
             self.context.update({"status_code": tabserver_response.status_code})
             return render(self.request, 'reports/tableau_request_failed.html',
                           self.context)
+
+    def tableau_online_response(self):
+        # Call the Tableau server to get a ticket.
+        return super().view_response
 
 
 # Making a class per visualization (and on each page load) is overkill, but

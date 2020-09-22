@@ -13,18 +13,22 @@
 {% block filter_panel %}
     <p>Title {{ report.title }}<p>
     <p>Slug {{ report.slug }}<p>
-    <p>Server {{ server }}<p>
+    <p>Server Type {{ server_type }}</p>
+    <p>Server {{ server_address }}<p>
     <p>Target Site {{ target_site }}<p>
-    <p>View URL https://{{ server }}/trusted/{{ ticket }}/{{ view_url }}</p>
-<script src="https://{{ server }}/javascripts/api/tableau-2.min.js"></script>
+    <p>View URL https://{{ server_address }}/trusted/{{ ticket }}/{{ view_url }}</p>
+
+<script src="https://{{ server_address }}/javascripts/api/tableau-2.min.js"></script>
 
 <script type="text/javascript">
     function initViz() {
-        var containerDiv = document.getElementById("vizContainer"),
+        var containerDiv = document.getElementById("vizContainer");
 
-        url = "https://{{ server }}/trusted/{{ ticket }}/{{ view_url }}"
+        var url = "https://{{ server_address }}/".concat(
+                  "{{ server_type }}" == "server" ? "trusted/{{ ticket }}/" : "",
+                  "{{ view_url }}");
 
-        options = {
+        var options = {
             hideTabs: true,
             onFirstInteractive: function () {
                 console.log("Run this code when the viz has finished loading.");
