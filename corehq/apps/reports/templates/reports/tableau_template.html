@@ -15,15 +15,14 @@
     <p>Slug {{ report.slug }}<p>
     <p>Server {{ server }}<p>
     <p>Target Site {{ target_site }}<p>
-    <p>View URL {{ view_url }}<p>
-
+    <p>View URL https://{{ server }}/trusted/{{ ticket }}/{{ view_url }}</p>
 <script src="https://{{ server }}/javascripts/api/tableau-2.min.js"></script>
 
 <script type="text/javascript">
     function initViz() {
         var containerDiv = document.getElementById("vizContainer"),
 
-        url = "https://{{ server }}/{{ view_url }}"
+        url = "https://{{ server }}/trusted/{{ ticket }}/{{ view_url }}"
 
         options = {
             hideTabs: true,

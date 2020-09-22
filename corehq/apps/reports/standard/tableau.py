@@ -46,12 +46,14 @@ class TableauReport(ProjectReport):
     @property
     def view_response(self):
         # Call the Tableau server to get a ticket.
-        # tabserver_url = 'https://{}/trusted/'.format(vis.server.server_name)
-        tabserver_url = 'http://localhost:8000/trusted/'
+        method = 'https'
+        tabserver_url = '{}://{}/trusted/'.format(method, self.visualization.server.server_name)
         tabserver_response = requests.post(tabserver_url,
-                                           {'username':self.request.user.username})
+                                           {'username':self.request.user.username},
+                                           verify='corehq/apps/reports/standard/CA_BUNDLE')
         if tabserver_response.status_code == 200:
             if tabserver_response.content != b'-1':
+                self.context.update({'ticket': tabserver_response.content.decode('utf-8')})
                 return super().view_response
             else:
                 return render(self.request, 'reports/tableau_auth_failed.html',
