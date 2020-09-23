@@ -215,7 +215,7 @@ class TableauServer(models.Model):
     )
     server_type = models.CharField(max_length=6, choices=SERVER_TYPES, default='server')
     server_name = models.CharField(max_length=128)
-    target_site = models.CharField(max_length=64)
+    target_site = models.CharField(max_length=64, default='Default')
 
     def __str__(self):
         return '{server} {server_type} {site}'.format(server=self.server_name,

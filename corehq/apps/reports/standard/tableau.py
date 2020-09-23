@@ -56,8 +56,11 @@ class TableauReport(ProjectReport):
         tabserver_url = 'https://{}/trusted/'.format(self.visualization.server.server_name)
         # The verify argument indicates that we trust the self-signed certificate
         # which lets SSL connections succeed. It should not be used in production.
+        post_arguments = {'username':self.request.user.username}
+        if self.visualization.server.target_site != 'Default':
+            post_arguments.update({'target_site': self.visualization.server.target_site})
         tabserver_response = requests.post(tabserver_url,
-                                           {'username':self.request.user.username},
+                                           post_arguments,
                                            verify='corehq/apps/reports/standard/CA_BUNDLE')
         if tabserver_response.status_code == 200:
             if tabserver_response.content != b'-1':
