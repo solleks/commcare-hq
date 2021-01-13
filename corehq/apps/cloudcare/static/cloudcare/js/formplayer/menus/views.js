@@ -233,11 +233,9 @@ hqDefine("cloudcare/js/formplayer/menus/views", function () {
         className: "formplayer-request",
 
         attributes: function () {
-            var labelId = "case-view-item-".concat(this.options.model.attributes.id);
             return {
                 "role": "link",
                 "tabindex": "0",
-                "aria-labelledby": labelId,
             };
         },
 
@@ -260,7 +258,6 @@ hqDefine("cloudcare/js/formplayer/menus/views", function () {
                 resolveUri: function (uri) {
                     return FormplayerFrontend.getChannel().request('resourceMap', uri, appId);
                 },
-                labelId: "case-view-item-".concat(this.options.model.attributes.id),
             };
         },
     });
