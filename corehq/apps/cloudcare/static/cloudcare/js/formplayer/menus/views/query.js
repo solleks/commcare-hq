@@ -46,12 +46,28 @@ hqDefine("cloudcare/js/formplayer/menus/views/query", function () {
             'change': 'render',
         },
 
+        onDestroy: function () {
+            if (this.selectWooContainers) {
+                var i = 0;
+                for (i = 0; i < this.selectWooContainers.length; i++) {
+                    this.selectWooContainers[i].removeClass('select2-container--focus');
+                }
+                this.selectWooContainers = [];
+            }
+        },
+
         onRender: function () {
-            this.ui.valueDropdown.select2({
+            var selectW = this.ui.valueDropdown.selectWoo({
                 allowClear: true,
                 placeholder: " ",   // required for allowClear to work
                 escapeMarkup: function (m) { return DOMPurify.sanitize(m); },
             });
+            if (selectW.length > 0) {
+                if (!this.selectWooContainers) {
+                    this.selectWooContainers = [];
+                }
+                this.selectWooContainers.push(selectW.data('select2').$container);
+            }
             this.ui.hqHelp.hqHelp();
             this.ui.dateRange.daterangepicker({
                 locale: {
@@ -140,12 +156,12 @@ hqDefine("cloudcare/js/formplayer/menus/views/query", function () {
                     if (choices) {
                         var $field = $($fields.get(i)),
                             value = parseInt(response.models[i].get('value'));
-                        $field.select2('close');    // force close dropdown, the set below can interfere with this when clearing selection
+                        $field.selectWoo('close');    // force close dropdown, the set below can interfere with this when clearing selection
                         self.collection.models[i].set({
                             itemsetChoices: choices,
                             value: value,
                         });
-                        $field.trigger('change.select2');
+                        $field.trigger('change.selectWoo');
                     }
                 }
                 self.setStickyQueryInputs();
