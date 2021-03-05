@@ -46,13 +46,15 @@ hqDefine("cloudcare/js/formplayer/menus/views/query", function () {
             'change': 'render',
         },
 
-        onDestroy: function () {
-            if (this.selectWooContainers) {
-                var i = 0;
-                for (i = 0; i < this.selectWooContainers.length; i++) {
-                    this.selectWooContainers[i].removeClass('select2-container--focus');
-                }
-                this.selectWooContainers = [];
+        onBeforeRender: function() {
+            // Remove focus from any selectWoos that already exist because
+            // they will be replaced in onRender. When overwritten selectWoos
+            // think they have focus, they can respond to keypresses and
+            // spontaneously pop up and hide part of the HQ container.
+            if (this.selectWoos) {
+                this.selectWoos.forEach(function (selectWoo) {
+                    selectWoo.trigger('blur');
+                });
             }
         },
 
@@ -63,10 +65,10 @@ hqDefine("cloudcare/js/formplayer/menus/views/query", function () {
                 escapeMarkup: function (m) { return DOMPurify.sanitize(m); },
             });
             if (selectW.length > 0) {
-                if (!this.selectWooContainers) {
-                    this.selectWooContainers = [];
+                if (!this.selectWoos) {
+                    this.selectWoos = [];
                 }
-                this.selectWooContainers.push(selectW.data('select2').$container);
+                this.selectWoos.push(selectW.data('select2'));
             }
             this.ui.hqHelp.hqHelp();
             this.ui.dateRange.daterangepicker({
