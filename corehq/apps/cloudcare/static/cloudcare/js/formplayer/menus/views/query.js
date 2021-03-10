@@ -187,7 +187,8 @@ hqDefine("cloudcare/js/formplayer/menus/views/query", function () {
             // Workaround for selectWoo. Elements are kept alive indefinitely
             // by a keydown handler on the document, so we remove them on
             // submission.
-            $(document).off('keydown');
+            // BUG! This call removes handlers that we did not install!
+            $(document).off('keydown.selectwoo');
         },
 
         setStickyQueryInputs: function () {
