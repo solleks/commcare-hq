@@ -11,7 +11,7 @@
         "DOMPurify": "cure53/DOMPurify#2.2.2",
         "ace-builds": "1.3.3",
         "angular": "1.7.9",
-        "angular-animate": "1.7.9",
+        "angular-animate": "1.8.2",
         "angular-busy": "4.1.4",
         "angular-cookies": "1.7.9",
         "angular-datamaps": "0.1.2",
