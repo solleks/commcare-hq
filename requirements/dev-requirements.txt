@@ -279,7 +279,7 @@ importlib-metadata==2.0.0
     #   jsonschema
 intervaltree==3.1.0
     # via ddtrace
-ipdb==0.11
+ipdb==0.13.7
     # via -r dev-requirements.in
 ipython-genutils==0.2.0
     # via traitlets
@@ -648,6 +648,8 @@ tinycss2==1.0.2
     #   weasyprint
 tinys3==0.1.12
     # via -r base-requirements.in
+toml==0.10.2
+    # via ipdb
 traceback2==1.4.0
     # via unittest2
 traitlets==4.3.3
